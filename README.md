@@ -1,36 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CodeSync
 
-## Getting Started
+CodeSync is a technical interview collaboration platform designed to connect candidates and interviewers in a structured interview environment.
 
-First, run the development server:
+The project is being built with Next.js, TypeScript, Clerk, Convex, and Stream.
 
-```bash
+## 🚀 Tech Stack
+
+- **Frontend:** Next.js, React, TypeScript
+- **Styling:** Tailwind CSS
+- **Authentication:** Clerk
+- **Backend & Database:** Convex
+- **Video Infrastructure:** Stream Video SDK
+- **Webhook Verification:** Svix
+
+## ✨ Current Features
+
+- 🔐 Authentication with Clerk
+- 👤 Candidate and interviewer roles
+- 🗄️ Convex database integration
+- 🔗 Clerk + Convex authentication integration
+- 🔄 Clerk webhook-based user synchronization
+- 🛡️ Svix webhook signature verification
+- 📹 Stream Video SDK integration foundation
+- ⚡ Next.js App Router architecture
+- 🧩 Server and client component architecture
+
+## 🏗️ Architecture
+
+CodeSync uses Clerk for authentication and Convex for backend data management.
+
+When a new user is created in Clerk:
+
+1. Clerk generates a `user.created` webhook event.
+2. The event is sent to the CodeSync Convex HTTP endpoint.
+3. Svix is used to verify the webhook signature.
+4. The verified event is processed by the Convex backend.
+5. User information is synchronized with the Convex `users` table.
+6. New users are assigned the default `candidate` role.
+
+### User Data
+
+The Convex `users` table currently stores:
+
+- Name
+- Email
+- Profile image
+- Clerk user ID
+- User role
+
+An index on `clerkId` is used for efficient user lookups.
+
+## 📂 Project Structure
+
+```text
+CodeSync/
+├── convex/
+│   ├── _generated/
+│   ├── auth.config.ts
+│   ├── http.ts
+│   ├── schema.ts
+│   └── users.ts
+│
+├── src/
+│   ├── app/
+│   ├── components/
+│   └── ...
+│
+├── public/
+├── .gitignore
+├── package.json
+├── package-lock.json
+└── README.md
+
+
+⚙️ Getting Started
+1. Clone the repository
+git clone https://github.com/SaumyaJain1711/CodeSync.git
+cd CodeSync
+2. Install dependencies
+npm install
+3. Configure environment variables
+
+Create a .env.local file in the project root.
+
+Add the required credentials for Clerk, Convex, and Stream:
+
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+
+
+NEXT_PUBLIC_CONVEX_URL=
+CONVEX_DEPLOYMENT=
+
+
+CLERK_FRONTEND_API_URL=
+CLERK_WEBHOOK_SECRET=
+
+
+NEXT_PUBLIC_STREAM_API_KEY=
+STREAM_SECRET_KEY=
+
+Never commit .env.local or expose secret keys publicly.
+
+4. Start the Next.js development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+5. Start the Convex development server
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+In a separate terminal:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+npx convex dev
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Then open:
 
-## Learn More
+http://localhost:3000
+🛣️ Roadmap
+ Interview room creation
+ Real-time video interviews
+ Screen sharing
+ Screen recording
+ Collaborative coding environment
+ Interview scheduling
+ Candidate dashboard
+ Interviewer dashboard
+ Interview history
+🔐 Security
 
-To learn more about Next.js, take a look at the following resources:
+Authentication is handled through Clerk.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Webhook requests from Clerk are verified using Svix signatures before user data is synchronized with Convex.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Environment variables containing credentials and secrets are kept in .env.local and excluded from version control.
 
-## Deploy on Vercel
+👩‍💻 Author
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Saumya Jain
