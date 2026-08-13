@@ -33,7 +33,7 @@ When a new user is created in Clerk:
 
 1. Clerk generates a `user.created` webhook event.
 2. The event is sent to the CodeSync Convex HTTP endpoint.
-3. Svix is used to verify the webhook signature.
+3. Svix verifies the webhook signature.
 4. The verified event is processed by the Convex backend.
 5. User information is synchronized with the Convex `users` table.
 6. New users are assigned the default `candidate` role.
@@ -72,42 +72,149 @@ CodeSync/
 ├── package-lock.json
 └── README.md
 
+⚙️ Getting Started
 
+Follow these steps to run CodeSync locally.
 
+1. Clone the repository
+git clone https://github.com/SaumyaJain1711/CodeSync.git
+cd CodeSync
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+2. Install Dependencies
+npm install
 
-## Getting Started
+3. Configure environment variables
 
-First, run the development server:
+Create a .env.local file in the project root.
 
-```bash
+Add the required credentials for Clerk, Convex, and Stream:
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+
+NEXT_PUBLIC_CONVEX_URL=
+CONVEX_DEPLOYMENT=
+
+CLERK_FRONTEND_API_URL=
+CLERK_WEBHOOK_SECRET=
+
+NEXT_PUBLIC_STREAM_API_KEY=
+STREAM_SECRET_KEY=
+
+Never commit .env.local or expose secret keys publicly.
+
+4. Start the Next.js development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+5. 5. Start the Convex development server
 
-## Learn More
+Open a second terminal in the project directory:
+npx convex dev
 
-To learn more about Next.js, take a look at the following resources:
+Keep this terminal running while developing the application.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🔐 Authentication & User Synchronization
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+CodeSync uses Clerk for authentication and Convex for backend data management.
 
-## Deploy on Vercel
+The authentication flow works as follows:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+User
+  │
+  ▼
+Clerk Authentication
+  │
+  ▼
+user.created Webhook
+  │
+  ▼
+Convex HTTP Action
+  │
+  ▼
+Svix Signature Verification
+  │
+  ▼
+Convex users.syncUser Mutation
+  │
+  ▼
+Convex Users Table
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+When a new user signs up:
+
+Clerk creates the user.
+Clerk sends a user.created webhook.
+Convex receives the webhook through /clerk-webhook.
+Svix verifies the webhook signature.
+Convex executes the syncUser mutation.
+The user is added to the Convex users table.
+The user receives the default candidate role.
+
+
+🗄️ Database
+
+The project currently contains a users table in Convex.
+
+Each user contains:
+
+Field	Description
+name	User's name
+email	User's email
+image	Optional profile image
+clerkId	Unique Clerk user ID
+role	candidate or interviewer
+
+The clerkId field has an index named:
+
+by_clerk_id
+
+This allows efficient user lookups using the Clerk ID.
+
+🔔 Webhooks
+
+CodeSync uses a Convex HTTP endpoint to receive Clerk webhook events.
+
+Endpoint:
+
+/clerk-webhook
+
+Webhook requests are verified using Svix before user data is written to Convex.
+
+This prevents unverified requests from modifying the database.
+
+🛡️ Security
+Authentication is handled through Clerk.
+Clerk webhook signatures are verified using Svix.
+Secret credentials are stored in environment variables.
+.env.local is excluded from version control.
+Clerk IDs are used to associate authenticated users with Convex records.
+
+Never commit CLERK_SECRET_KEY, CLERK_WEBHOOK_SECRET, STREAM_SECRET_KEY, or other private credentials to GitHub.
+
+🛣️ Roadmap
+ Interview room creation
+ Real-time video interviews
+ Screen sharing
+ Screen recording
+ Collaborative coding environment
+ Interview scheduling
+ Candidate dashboard
+ Interviewer dashboard
+ Interview history
+ Interview session management
+ Role-based interview workflows
+📈 Project Status
+
+CodeSync is currently under active development.
+
+The initial application foundation, authentication system, Convex backend, database schema, Clerk webhook integration, and user synchronization workflow have been implemented.
+
+Additional interview and collaboration functionality will be added incrementally.
+
+👩‍💻 Author
+
+Saumya Jain
+
+GitHub: https://github.com/SaumyaJain1711
